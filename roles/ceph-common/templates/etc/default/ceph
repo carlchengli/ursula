@@ -1,0 +1,7 @@
+# /etc/default/ceph
+
+{% if ceph.use_jemalloc %}
+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1
+{% else %}
+TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=134217728
+{% endif %}
