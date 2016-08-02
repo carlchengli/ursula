@@ -1,0 +1,37 @@
+---
+# Upgrade ceph monitors to jewel with jemalloc
+- hosts: ceph_monitors
+  tasks:
+    - apt: name=ceph=10.2.2-1 update_cache=yes
+
+# Not sure we should update for both monitor and osd
+# or just upgrade once at the end of uprade
+- name: ceph update
+  hosts: ceph_monitors
+  serial: 1
+  roles:
+    - role: ceph-update
+
+# Upgrade ceph osd to jewel with jemalloc
+- hosts: ceph_osds
+  tasks:
+    - apt: name=ceph=10.2.2-1 update_cache=yes
+
+- name: ceph update
+  hosts: ceph_osds
+  serial: 1
+  roles:
+    - role: ceph-update
+
+# Upgrade ceph client to jewel with jemalloc
+- hosts: controller:compute
+  tasks:
+    - apt: name=ceph=10.2.2-1 update_cache=yes
+
+# Print mon stat and osd stat
+# we should ensure monitors and osds have rejoined the quorum
+- hosts: ceph_monitors[0]
+  tasks:
+    - shell: ceph mon stat
+      failed_when: "'quorum 0,1,2 cpm1,cpm2,cpm3' not in result.stdout"
+    - shell: ceph osd stat
