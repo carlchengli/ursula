@@ -91,16 +91,6 @@
     - restart ceph mons
     - restart ceph osds
 
-- name: ceph defaut configuration
-  template: src=etc/default/ceph
-            dest=/etc/default/ceph
-            owner=root
-            group=root
-            mode=0644
-  notify:
-    - restart ceph mons
-    - restart ceph osds
-
 - include: logging.yml
   tags:
     - logrotate
