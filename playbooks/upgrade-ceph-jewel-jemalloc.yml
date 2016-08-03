@@ -3,6 +3,11 @@
 - hosts: ceph_monitors
   tasks:
     - apt: name=ceph=10.2.2-1 update_cache=yes
+    - replace: dest={{ item }} regex='setuser ceph' replace='setuser root'
+      with_items:
+        - /etc/init/ceph-mon.conf
+        - /etc/init/ceph-osd.conf
+        - /etc/init/ceph-mds.conf
 
 # Not sure we should update for both monitor and osd
 # or just upgrade once at the end of uprade
@@ -16,6 +21,11 @@
 - hosts: ceph_osds
   tasks:
     - apt: name=ceph=10.2.2-1 update_cache=yes
+    - replace: dest={{ item }} regex='setuser ceph' replace='setuser root'
+      with_items:
+        - /etc/init/ceph-mon.conf
+        - /etc/init/ceph-osd.conf
+        - /etc/init/ceph-mds.conf
 
 - name: ceph update
   hosts: ceph_osds
