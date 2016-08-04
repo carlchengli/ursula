@@ -37,6 +37,18 @@
 - hosts: controller:compute
   tasks:
     - apt: name=ceph=10.2.2-1 update_cache=yes
+    - replace: dest={{ item }} regex='setuser ceph' replace='setuser root'
+      with_items:
+        - /etc/init/ceph-mon.conf
+        - /etc/init/ceph-osd.conf
+        - /etc/init/ceph-mds.conf
+    - service: name="{{ item }}" state=restarted
+      with_items:
+        - cinder-api
+        - cinder-backup
+        - cinder-scheduler
+        - cinder-volume
+      when: inventory_hostname in groups['controller']
 
 # Print mon stat and osd stat
 # we should ensure monitors and osds have rejoined the quorum
