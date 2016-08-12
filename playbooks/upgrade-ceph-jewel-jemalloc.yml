@@ -3,25 +3,17 @@
 - hosts: ceph_monitors
   tasks:
     - apt: name=ceph=10.2.2-1 update_cache=yes
-    - replace: dest={{ item }} regex='setuser ceph' replace='setuser root'
+    - replace: dest={{ item }} regexp='setuser ceph' replace='setuser root'
       with_items:
         - /etc/init/ceph-mon.conf
         - /etc/init/ceph-osd.conf
         - /etc/init/ceph-mds.conf
 
-# Not sure we should update for both monitor and osd
-# or just upgrade once at the end of uprade
-- name: ceph update
-  hosts: ceph_monitors
-  serial: 1
-  roles:
-    - role: ceph-update
-
 # Upgrade ceph osd to jewel with jemalloc
 - hosts: ceph_osds
   tasks:
     - apt: name=ceph=10.2.2-1 update_cache=yes
-    - replace: dest={{ item }} regex='setuser ceph' replace='setuser root'
+    - replace: dest={{ item }} regexp='setuser ceph' replace='setuser root'
       with_items:
         - /etc/init/ceph-mon.conf
         - /etc/init/ceph-osd.conf
@@ -33,11 +25,11 @@
   roles:
     - role: ceph-update
 
-# Upgrade ceph client to jewel with jemalloc
-- hosts: controller:compute
+# Upgrade controller2 to jewel with jemalloc
+- hosts: controller
   tasks:
     - apt: name=ceph=10.2.2-1 update_cache=yes
-    - replace: dest={{ item }} regex='setuser ceph' replace='setuser root'
+    - replace: dest={{ item }} regexp='setuser ceph' replace='setuser root'
       with_items:
         - /etc/init/ceph-mon.conf
         - /etc/init/ceph-osd.conf
@@ -48,7 +40,27 @@
         - cinder-backup
         - cinder-scheduler
         - cinder-volume
-      when: inventory_hostname in groups['controller']
+    - file:
+        src: /usr/lib/python2.7/dist-packages/{{ item }}
+        dest: /opt/openstack/current/{{ item.server }}/lib/python2.7/site-packages/{{ item.module }}
+        state: link
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - {server: cinder, module: rados.so}
+        - {server: cinder, module: rbd.so}
+        - {server: glance, module: rados.so}
+        - {server: glance, module: rbd.so}
+
+- hosts: compute
+  tasks:
+    - apt: name=ceph=10.2.2-1 update_cache=yes
+    - replace: dest={{ item }} regexp='setuser ceph' replace='setuser root'
+      with_items:
+        - /etc/init/ceph-mon.conf
+        - /etc/init/ceph-osd.conf
+        - /etc/init/ceph-mds.conf
 
 # Print mon stat and osd stat
 # we should ensure monitors and osds have rejoined the quorum

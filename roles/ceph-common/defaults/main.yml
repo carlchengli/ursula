@@ -8,7 +8,7 @@ ceph:
   #  - sdd
   #bcache_ssd_device: sdg 
 
-  stable_release: hammer
+  stable_release: jewel
 
   openstack_keys:
     - { name: client.glance, value: "mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=default'" }
@@ -20,8 +20,7 @@ ceph:
     - ntp
     - hdparm
   ceph_pkgs:
-    - ceph
-    - ceph-common
+    - ceph=10.2.2-1
   osd_pkgs:
     - parted
   bcache_pkgs:

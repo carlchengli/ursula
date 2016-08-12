@@ -35,6 +35,13 @@
   until: result|succeeded
   retries: 5
 
+- name: update upstart config
+  replace: dest={{ item }} regexp='setuser ceph' replace='setuser root'
+  with_items:
+    - /etc/init/ceph-mon.conf
+    - /etc/init/ceph-osd.conf
+    - /etc/init/ceph-mds.conf
+
 - name: check for a ceph socket
   shell: "stat /var/run/ceph/*.asok > /dev/null 2>&1"
   changed_when: false
